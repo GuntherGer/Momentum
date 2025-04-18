@@ -1,0 +1,158 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c100000\c100000\c100000;}
+\margl1440\margr1440\vieww15500\viewh19380\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 // This Pine Script\'ae code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/\
+// \'a9 guntherger\
+// https://github.com/GuntherGer/Momentum\
+//@version=6\
+\
+indicator("EMA9, EMA50, VWAP + Signal Markers", shorttitle="-", overlay=true)\
+\
+// \uc0\u9472 \u9472 \u9472  EMAs \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+ema9 = ta.ema(close, 9)\
+ema50 = ta.ema(close, 20)\
+\
+// \uc0\u9472 \u9472 \u9472  EMA Distance Logic \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+dist = math.abs(ema9 - ema50)\
+dist_prev = nz(dist[1])\
+increasing = dist > dist_prev\
+\
+// \uc0\u9472 \u9472 \u9472  VWAP \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+vwap = ta.vwap(hlc3)\
+\
+// \uc0\u9472 \u9472 \u9472  Plot EMAs and VWAP \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+plot_ema9 = plot(ema9, color=color.red, linewidth=1, title="EMA9")\
+plot_ema50 = plot(ema50, color=color.blue, linewidth=1, title="EMA20")\
+plot_vwap = plot(vwap, color=color.aqua, linewidth=1, title="D-VWAP")\
+\
+fill(plot_ema9, plot_ema50, color=increasing ? color.new(color.green, 85) : color.new(color.red, 85))\
+\
+// \uc0\u9472 \u9472 \u9472  Bearish Signal \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+bear_cross = ta.crossover(ema9, close)\
+bear_stack = ema9 < ema50 and ema50 < vwap\
+show_bear = bear_cross and bear_stack\
+plotshape(show_bear, location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small, title="Bearish Marker")\
+\
+\
+// \uc0\u9472 \u9472 \u9472  Bullish Signal \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+bull_cross = ta.crossunder(ema9, close)\
+bull_stack = ema9 > ema50 and ema50 > vwap\
+show_bull = bull_cross and bull_stack\
+plotshape(show_bull, location=location.belowbar, color=color.lime, style=shape.triangleup, size=size.small, title="Bullish Marker")\
+\
+\
+// \uc0\u9472 \u9472 \u9472  Daily High/Low Tracking \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+isNewDay = ta.change(time("D")) != 0\
+var float dayHigh = na\
+var float dayLow = na\
+var int sessionStartBar = na\
+\
+if isNewDay\
+    dayHigh := high\
+    dayLow := low\
+    sessionStartBar := bar_index\
+else\
+    dayHigh := math.max(dayHigh, high)\
+    dayLow := math.min(dayLow, low)\
+\
+\
+// \uc0\u9472 \u9472 \u9472  Persistent Horizontal Lines \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+var line highLine = line.new(x1=na, y1=na, x2=na, y2=na, color=color.green, width=1)\
+var line lowLine = line.new(x1=na, y1=na, x2=na, y2=na, color=color.red, width=1)\
+\
+var label highLineLabel = label.new(x=na, y=na, text="", style=label.style_label_center, color=color.new(color.green, 0), textcolor=color.white, size=size.small)\
+var label lowLineLabel = label.new(x=na, y=na, text="", style=label.style_label_center, color=color.new(color.red, 0), textcolor=color.white, size=size.small)\
+\
+if not na(sessionStartBar)\
+    line.set_xy1(highLine, sessionStartBar, dayHigh)\
+    line.set_xy2(highLine, bar_index + 1, dayHigh)\
+    label.set_xy(highLineLabel, bar_index + 1, dayHigh)\
+    label.set_text(highLineLabel, "High")\
+\
+    line.set_xy1(lowLine, sessionStartBar, dayLow)\
+    line.set_xy2(lowLine, bar_index + 1, dayLow)\
+    label.set_xy(lowLineLabel, bar_index + 1, dayLow)\
+    label.set_text(lowLineLabel, "Low")\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+// \uc0\u9472 \u9472 \u9472  Cross Detection \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+crossedAboveHigh = ta.crossover(close, dayHigh)\
+crossedBelowLow = ta.crossunder(close, dayLow)\
+\
+// \uc0\u9472 \u9472 \u9472  Plot Markers \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+plotshape(crossedAboveHigh, title="Crossed Above High", location=location.abovebar, style=shape.circle, size=size.small, color=color.green)\
+plotshape(crossedBelowLow, title="Crossed Below Low", location=location.belowbar, style=shape.circle, size=size.small, color=color.red)
+\f0 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 // \uc0\u9472 \u9472 \u9472  Alert Conditions \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
+alertcondition(crossedAboveHigh, title="Alert: Price Crossed Above Day High", message="\uc0\u55357 \u56596  Price crossed above daily high!")\
+alertcondition(crossedBelowLow, title="Alert: Price Crossed Below Day Low", message="\uc0\u55357 \u56596  Price crossed below daily low!")\
+\
+// Optional runtime alerts (sound in live chart, not strategy)\
+if crossedAboveHigh\
+    alert("\uc0\u55357 \u56596  Price crossed above daily high!", alert.freq_once_per_bar)\
+\
+if crossedBelowLow\
+    alert("\uc0\u55357 \u56596  Price crossed below daily low!", alert.freq_once_per_bar)\
+\pard\pardeftab720\partightenfactor0
+
+\f0 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \
+\
+\
+// Add a Dot when RSI cross over MACD\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+}
